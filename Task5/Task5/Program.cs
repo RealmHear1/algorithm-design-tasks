@@ -119,7 +119,8 @@ namespace Task5
             Console.WriteLine("После уменьшения ключа: " + heap1.GetMin());
             Console.WriteLine("Удаление минимума: " + heap1.RemoveMin());
             Console.WriteLine("Новый минимум: " + heap1.GetMin());
-            var heap2 = new MinHeap(new int[] { 100, 50, 200 });
+            heap1.PrintHeap();
+            var heap2 = new MinHeap(new int[] { 4, 50, 200 });
             var merged = heap1.Merge(heap2);
             Console.WriteLine("Минимум объединённой кучи: " + merged.GetMin());
             merged.PrintHeap();

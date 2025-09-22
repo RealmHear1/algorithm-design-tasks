@@ -19,9 +19,12 @@ namespace Task6
             : this(initialCapacity, Comparer<T>.Default) { }
         public MyPriorityQueue(int initialCapacity, IComparer<T> comp)
         {
-            if (initialCapacity <= 0) throw new ArgumentException("Capacity must be > 0");
+            if (initialCapacity <= 0) throw new ArgumentException("Вместимость должна быть > 0");
             queue = new T[initialCapacity];
-            comparator = comp ?? Comparer<T>.Default;
+            if (comp != null)
+                comparator = comp;
+            else
+                comparator = Comparer<T>.Default;
             size = 0;
         }
         public MyPriorityQueue(T[] a)

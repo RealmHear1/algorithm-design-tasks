@@ -22,7 +22,7 @@ namespace Task17
         }
         private List<(string Structure, string Operation, int Size, double TimeMs)> RunTests(Action<int> progressUpdate)
         {
-            int[] sizes = { 1_000, 50_00, 10_000 };
+            int[] sizes = { 1_000, 5_000, 10_000 };
             int runs = 3;
             var results = new List<(string, string, int, double)>();
             int totalSteps = sizes.Length * 5;

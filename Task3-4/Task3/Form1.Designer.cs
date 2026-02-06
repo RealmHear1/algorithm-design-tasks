@@ -35,6 +35,7 @@
             this.zedGraph = new ZedGraph.ZedGraphControl();
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.txtOutput = new System.Windows.Forms.TextBox();
+            this.comboType = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // comboDataType
@@ -96,11 +97,21 @@
             this.txtOutput.Size = new System.Drawing.Size(232, 238);
             this.txtOutput.TabIndex = 7;
             // 
+            // comboType
+            // 
+            this.comboType.FormattingEnabled = true;
+            this.comboType.Location = new System.Drawing.Point(828, 373);
+            this.comboType.Name = "comboType";
+            this.comboType.Size = new System.Drawing.Size(233, 24);
+            this.comboType.TabIndex = 8;
+            this.comboType.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1092, 505);
+            this.Controls.Add(this.comboType);
             this.Controls.Add(this.txtOutput);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.zedGraph);
@@ -123,6 +134,7 @@
         private ZedGraph.ZedGraphControl zedGraph;
         private System.Windows.Forms.ProgressBar progressBar;
         private System.Windows.Forms.TextBox txtOutput;
+        private System.Windows.Forms.ComboBox comboType;
     }
 }
 

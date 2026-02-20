@@ -1,47 +1,339 @@
 ﻿using System;
 using System.Collections.Generic;
 
+public delegate int TreeMapComparator<K>(K a, K b);
+
+public class MyTreeMap<K, V>
+{
+    private enum Color { Red, Black }
+
+    private class Node
+    {
+        public K Key;
+        public V Value;
+        public Node Left;
+        public Node Right;
+        public Node Parent;
+        public Color Color;
+
+        public Node(K key, V value, Node parent)
+        {
+            Key = key;
+            Value = value;
+            Parent = parent;
+            Color = Color.Red;
+        }
+    }
+
+    private TreeMapComparator<K> comparator;
+    private Node root;
+    private int size;
+
+    public MyTreeMap()
+    {
+        comparator = null;
+    }
+
+    public MyTreeMap(TreeMapComparator<K> comp)
+    {
+        comparator = comp;
+    }
+
+    private int Compare(K a, K b)
+    {
+        if (comparator != null)
+            return comparator(a, b);
+        return ((IComparable<K>)a).CompareTo(b);
+    }
+
+    public void Clear()
+    {
+        root = null;
+        size = 0;
+    }
+
+    public bool IsEmpty() => size == 0;
+    public int Size() => size;
+
+    private Node FindNode(K key)
+    {
+        Node current = root;
+        while (current != null)
+        {
+            int cmp = Compare(key, current.Key);
+            if (cmp == 0) return current;
+            current = cmp < 0 ? current.Left : current.Right;
+        }
+        return null;
+    }
+
+    public bool ContainsKey(object key)
+    {
+        if (key == null) return false;
+        return FindNode((K)key) != null;
+    }
+
+    public List<K> KeySet()
+    {
+        List<K> list = new List<K>();
+        InOrder(root, list);
+        return list;
+    }
+
+    private void InOrder(Node node, List<K> list)
+    {
+        if (node == null) return;
+        InOrder(node.Left, list);
+        list.Add(node.Key);
+        InOrder(node.Right, list);
+    }
+
+    private void RotateLeft(Node x)
+    {
+        Node y = x.Right;
+        x.Right = y.Left;
+        if (y.Left != null) y.Left.Parent = x;
+
+        y.Parent = x.Parent;
+
+        if (x.Parent == null)
+            root = y;
+        else if (x == x.Parent.Left)
+            x.Parent.Left = y;
+        else
+            x.Parent.Right = y;
+
+        y.Left = x;
+        x.Parent = y;
+    }
+
+    private void RotateRight(Node x)
+    {
+        Node y = x.Left;
+        x.Left = y.Right;
+        if (y.Right != null) y.Right.Parent = x;
+
+        y.Parent = x.Parent;
+
+        if (x.Parent == null)
+            root = y;
+        else if (x == x.Parent.Right)
+            x.Parent.Right = y;
+        else
+            x.Parent.Left = y;
+
+        y.Right = x;
+        x.Parent = y;
+    }
+
+
+    private void FixInsert(Node z)
+    {
+        while (z.Parent != null && z.Parent.Color == Color.Red)
+        {
+            if (z.Parent == z.Parent.Parent.Left)
+            {
+                Node y = z.Parent.Parent.Right;
+
+                if (y != null && y.Color == Color.Red)
+                {
+                    z.Parent.Color = Color.Black;
+                    y.Color = Color.Black;
+                    z.Parent.Parent.Color = Color.Red;
+                    z = z.Parent.Parent;
+                }
+                else
+                {
+                    if (z == z.Parent.Right)
+                    {
+                        z = z.Parent;
+                        RotateLeft(z);
+                    }
+
+                    z.Parent.Color = Color.Black;
+                    z.Parent.Parent.Color = Color.Red;
+                    RotateRight(z.Parent.Parent);
+                }
+            }
+            else
+            {
+                Node y = z.Parent.Parent.Left;
+
+                if (y != null && y.Color == Color.Red)
+                {
+                    z.Parent.Color = Color.Black;
+                    y.Color = Color.Black;
+                    z.Parent.Parent.Color = Color.Red;
+                    z = z.Parent.Parent;
+                }
+                else
+                {
+                    if (z == z.Parent.Left)
+                    {
+                        z = z.Parent;
+                        RotateRight(z);
+                    }
+
+                    z.Parent.Color = Color.Black;
+                    z.Parent.Parent.Color = Color.Red;
+                    RotateLeft(z.Parent.Parent);
+                }
+            }
+        }
+
+        root.Color = Color.Black;
+    }
+
+
+    public void Put(K key, V value)
+    {
+        if (key == null)
+            throw new ArgumentException("Key is null");
+
+        Node parent = null;
+        Node current = root;
+
+        while (current != null)
+        {
+            parent = current;
+            int cmp = Compare(key, current.Key);
+
+            if (cmp == 0)
+            {
+                current.Value = value;
+                return;
+            }
+            current = cmp < 0 ? current.Left : current.Right;
+        }
+
+        Node newNode = new Node(key, value, parent);
+
+        if (parent == null)
+            root = newNode;
+        else if (Compare(key, parent.Key) < 0)
+            parent.Left = newNode;
+        else
+            parent.Right = newNode;
+
+        FixInsert(newNode);
+        size++;
+    }
+
+
+    private Node Min(Node n)
+    {
+        while (n.Left != null) n = n.Left;
+        return n;
+    }
+
+    private Node Max(Node n)
+    {
+        while (n.Right != null) n = n.Right;
+        return n;
+    }
+
+    public K FirstKey() => Min(root).Key;
+    public K LastKey() => Max(root).Key;
+
+
+    public bool Remove(object key)
+    {
+        if (key == null) return false;
+        Node node = FindNode((K)key);
+        if (node == null) return false;
+
+        if (node.Left == null)
+            Replace(node, node.Right);
+        else if (node.Right == null)
+            Replace(node, node.Left);
+        else
+        {
+            Node min = Min(node.Right);
+            node.Key = min.Key;
+            node.Value = min.Value;
+            Replace(min, min.Right);
+        }
+
+        size--;
+        return true;
+    }
+
+    private void Replace(Node u, Node v)
+    {
+        if (u.Parent == null)
+            root = v;
+        else if (u == u.Parent.Left)
+            u.Parent.Left = v;
+        else
+            u.Parent.Right = v;
+
+        if (v != null)
+            v.Parent = u.Parent;
+    }
+
+    public K HigherKey(K key)
+    {
+        foreach (var k in KeySet())
+            if (Compare(k, key) > 0)
+                return k;
+        return default;
+    }
+
+    public K LowerKey(K key)
+    {
+        K res = default;
+        foreach (var k in KeySet())
+            if (Compare(k, key) < 0)
+                res = k;
+        return res;
+    }
+
+    public K CeilingKey(K key)
+    {
+        foreach (var k in KeySet())
+            if (Compare(k, key) >= 0)
+                return k;
+        return default;
+    }
+
+    public K FloorKey(K key)
+    {
+        K res = default;
+        foreach (var k in KeySet())
+            if (Compare(k, key) <= 0)
+                res = k;
+        return res;
+    }
+
+    public KeyValuePair<K, V>? PollFirstEntry()
+    {
+        if (root == null) return null;
+        Node min = Min(root);
+        var res = new KeyValuePair<K, V>(min.Key, min.Value);
+        Remove(min.Key);
+        return res;
+    }
+
+    public KeyValuePair<K, V>? PollLastEntry()
+    {
+        if (root == null) return null;
+        Node max = Max(root);
+        var res = new KeyValuePair<K, V>(max.Key, max.Value);
+        Remove(max.Key);
+        return res;
+    }
+}
+
 public class MyTreeSet<E>
 {
     private MyTreeMap<E, object> m;
     private static readonly object PRESENT = new object();
 
-    // 1. Пустое множество (естественный порядок)
     public MyTreeSet()
     {
         m = new MyTreeMap<E, object>();
     }
 
-    // 2. С существующим TreeMap
-    public MyTreeSet(MyTreeMap<E, object> map)
-    {
-        if (map == null)
-            throw new ArgumentException("Map не может быть null");
-        m = map;
-    }
-
-    // 3. С компаратором
-    public MyTreeSet(TreeMapComparator<E> comparator)
-    {
-        m = new MyTreeMap<E, object>(comparator);
-    }
-
-    // 4. Из массива
-    public MyTreeSet(E[] a)
-    {
-        m = new MyTreeMap<E, object>();
-        AddAll(a);
-    }
-
-    // 5. Из SortedSet
-    public MyTreeSet(SortedSet<E> s)
-    {
-        m = new MyTreeMap<E, object>();
-        foreach (E e in s)
-            Add(e);
-    }
-
-    // 6. add
     public bool Add(E e)
     {
         if (m.ContainsKey(e))
@@ -50,242 +342,25 @@ public class MyTreeSet<E>
         return true;
     }
 
-    // 7. addAll
-    public void AddAll(E[] a)
-    {
-        if (a == null) return;
-        foreach (E e in a)
-            Add(e);
-    }
+    public int Size() => m.Size();
+    public E First() => m.FirstKey();
+    public E Last() => m.LastKey();
+    public E Higher(E obj) => m.HigherKey(obj);
+    public E Lower(E obj) => m.LowerKey(obj);
+    public E Ceiling(E obj) => m.CeilingKey(obj);
+    public E Floor(E obj) => m.FloorKey(obj);
+    public bool Remove(object o) => m.Remove(o);
 
-    // 8. clear
-    public void Clear()
-    {
-        m.Clear();
-    }
-
-    // 9. contains
-    public bool Contains(object o)
-    {
-        return m.ContainsKey(o);
-    }
-
-    // 10. containsAll
-    public bool ContainsAll(E[] a)
-    {
-        if (a == null) return true;
-        foreach (E e in a)
-            if (!Contains(e)) return false;
-        return true;
-    }
-
-    // 11. isEmpty
-    public bool IsEmpty()
-    {
-        return m.IsEmpty();
-    }
-
-    // 12. remove
-    public bool Remove(object o)
-    {
-        return m.Remove(o);
-    }
-
-    // 13. removeAll
-    public void RemoveAll(E[] a)
-    {
-        if (a == null) return;
-        foreach (E e in a)
-            Remove(e);
-    }
-
-    // 14. retainAll
-    public void RetainAll(E[] a)
-    {
-        if (a == null)
-        {
-            Clear();
-            return;
-        }
-
-        HashSet<E> keep = new HashSet<E>(a);
-        List<E> keys = m.KeySet();
-
-        foreach (E e in keys)
-            if (!keep.Contains(e))
-                Remove(e);
-    }
-
-    // 15. size
-    public int Size()
-    {
-        return m.Size();
-    }
-
-    // 16. toArray()
-    public object[] ToArray()
-    {
-        List<E> keys = m.KeySet();
-        object[] arr = new object[keys.Count];
-        for (int i = 0; i < keys.Count; i++)
-            arr[i] = keys[i];
-        return arr;
-    }
-
-    // 17. toArray(T[] a)
-    public E[] ToArray(E[] a)
-    {
-        List<E> keys = m.KeySet();
-        if (a == null || a.Length < keys.Count)
-            a = new E[keys.Count];
-
-        for (int i = 0; i < keys.Count; i++)
-            a[i] = keys[i];
-        return a;
-    }
-
-    // 18. first
-    public E First()
-    {
-        return m.FirstKey();
-    }
-
-    // 19. last
-    public E Last()
-    {
-        return m.LastKey();
-    }
-
-    // 20. subSet [from; to)
-    public MyTreeSet<E> SubSet(E fromElement, E toElement)
-    {
-        MyTreeMap<E, object> sub = m.SubMap(fromElement, toElement);
-        return new MyTreeSet<E>(sub);
-    }
-
-    // 21. headSet (< toElement)
-    public MyTreeSet<E> HeadSet(E toElement)
-    {
-        MyTreeMap<E, object> sub = m.HeadMap(toElement);
-        return new MyTreeSet<E>(sub);
-    }
-
-    // 22. tailSet (>= fromElement)
-    public MyTreeSet<E> TailSet(E fromElement)
-    {
-        MyTreeMap<E, object> sub = m.TailMap(fromElement);
-        return new MyTreeSet<E>(sub);
-    }
-
-    // 23. ceiling (>=)
-    public E Ceiling(E obj)
-    {
-        var e = m.CeilingKey(obj);
-        return e;
-    }
-
-    // 24. floor (<=)
-    public E Floor(E obj)
-    {
-        var e = m.FloorKey(obj);
-        return e;
-    }
-
-    // 25. higher (>)
-    public E Higher(E obj)
-    {
-        return m.HigherKey(obj);
-    }
-
-    // 26. lower (<)
-    public E Lower(E obj)
-    {
-        return m.LowerKey(obj);
-    }
-
-    // 27. headSet(bound, incl)
-    public MyTreeSet<E> HeadSet(E upperBound, bool incl)
-    {
-        MyTreeMap<E, object> result = new MyTreeMap<E, object>();
-        foreach (E e in m.KeySet())
-        {
-            int cmp = ((IComparable<E>)e).CompareTo(upperBound);
-            if (cmp < 0 || (incl && cmp == 0))
-                result.Put(e, PRESENT);
-        }
-        return new MyTreeSet<E>(result);
-    }
-
-    // 28. subSet(lower, lowIncl, upper, highIncl)
-    public MyTreeSet<E> SubSet(E lower, bool lowIncl, E upper, bool highIncl)
-    {
-        MyTreeMap<E, object> result = new MyTreeMap<E, object>();
-
-        foreach (E e in m.KeySet())
-        {
-            int c1 = ((IComparable<E>)e).CompareTo(lower);
-            int c2 = ((IComparable<E>)e).CompareTo(upper);
-
-            bool okLower = c1 > 0 || (lowIncl && c1 == 0);
-            bool okUpper = c2 < 0 || (highIncl && c2 == 0);
-
-            if (okLower && okUpper)
-                result.Put(e, PRESENT);
-        }
-
-        return new MyTreeSet<E>(result);
-    }
-
-    // 29. tailSet(bound, inclusive)
-    public MyTreeSet<E> TailSet(E fromElement, bool inclusive)
-    {
-        MyTreeMap<E, object> result = new MyTreeMap<E, object>();
-
-        foreach (E e in m.KeySet())
-        {
-            int cmp = ((IComparable<E>)e).CompareTo(fromElement);
-            if (cmp > 0 || (inclusive && cmp == 0))
-                result.Put(e, PRESENT);
-        }
-
-        return new MyTreeSet<E>(result);
-    }
-
-    // 30. pollLast
-    public E PollLast()
-    {
-        var e = m.PollLastEntry();
-        if (e.HasValue)
-            return e.Value.Key;
-        return default(E);
-    }
-
-    // 31. pollFirst
     public E PollFirst()
     {
         var e = m.PollFirstEntry();
-        if (e.HasValue)
-            return e.Value.Key;
-        return default(E);
+        return e.HasValue ? e.Value.Key : default;
     }
 
-    // 32. descendingIterator
-    public List<E> DescendingIterator()
+    public E PollLast()
     {
-        List<E> list = m.KeySet();
-        list.Reverse();
-        return list;
-    }
-
-    // 33. descendingSet
-    public MyTreeSet<E> DescendingSet()
-    {
-        MyTreeSet<E> set = new MyTreeSet<E>();
-        List<E> list = m.KeySet();
-        list.Reverse();
-        foreach (E e in list)
-            set.Add(e);
-        return set;
+        var e = m.PollLastEntry();
+        return e.HasValue ? e.Value.Key : default;
     }
 }
 

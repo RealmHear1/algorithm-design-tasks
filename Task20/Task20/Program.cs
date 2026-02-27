@@ -9,23 +9,23 @@ class Program
         string path = "graph.txt";
         var graphData = ReadGraph(path);
 
-        Console.WriteLine("Tarjan SCC");
+        Console.WriteLine("Тарьян");
         var tarjan = new TarjanSCC(graphData.AdjList);
         tarjan.FindSCC();
 
-        Console.WriteLine("\nDinic Max Flow");
+        Console.WriteLine("\nДиниц");
         var dinic = new Dinic(graphData.VertexCount);
         foreach (var edge in graphData.Edges)
             dinic.AddEdge(edge.Item1, edge.Item2, edge.Item3);
 
         int maxFlow = dinic.MaxFlow(0, graphData.VertexCount - 1);
-        Console.WriteLine("Max Flow: " + maxFlow);
+        Console.WriteLine("Максимальный поток: " + maxFlow);
 
-        Console.WriteLine("\nClique Heuristic");
+        Console.WriteLine("\nАлгоритм клик");
         var clique = new CliqueHeuristic(graphData.AdjListUndirected);
         var result = clique.FindClique();
-        Console.WriteLine("Clique size: " + result.Count);
-        Console.WriteLine("Vertices: " + string.Join(", ", result));
+        Console.WriteLine("Размер клики: " + result.Count);
+        Console.WriteLine("Вершины: " + string.Join(", ", result));
     }
 
     static GraphData ReadGraph(string path)

@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7C99E8E2-A155-4457-98B2-6703C475B7C0}</ProjectGuid>
+    <ProjectGuid>{100B584F-CC47-4304-804B-EEE11A329FD3}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Task19</RootNamespace>
-    <AssemblyName>Task19</AssemblyName>
+    <RootNamespace>Task28</RootNamespace>
+    <AssemblyName>Task28</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -43,9 +43,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MyArrayDeque.cs" />
+    <Compile Include="MyArrayList.cs" />
+    <Compile Include="MyHashSet.cs" />
     <Compile Include="MyIterator.cs" />
     <Compile Include="MyIteratorExceptions.cs" />
+    <Compile Include="MyLinkedList.cs" />
     <Compile Include="MyListIterator.cs" />
+    <Compile Include="MyPriopityQueue.cs" />
+    <Compile Include="MyTreeSet.cs" />
+    <Compile Include="MyVector.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -53,9 +60,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Task18\Task18\Task18.csproj">
-      <Project>{de59a64d-789d-401e-a5f3-6cc61d6091cb}</Project>
-      <Name>Task18</Name>
+    <ProjectReference Include="..\..\Task21\Task21\Task21.csproj">
+      <Project>{fcf7b850-265d-47c9-8784-d738521f195b}</Project>
+      <Name>Task21</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

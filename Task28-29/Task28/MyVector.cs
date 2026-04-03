@@ -1,23 +1,23 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-public class MyVector<T>
+
+public class MyVector<T> : MyList<T>
 {
-    private T[] elementData;   
-    private int elementCount;    
+    private T[] elementData;
+    private int elementCount;
     private int capacityIncrement;
-    // 1) Конструктор с capacity и capacityIncrement
+
     public MyVector(int initialCapacity, int capacityIncrement)
     {
         if (initialCapacity < 0) throw new ArgumentOutOfRangeException(nameof(initialCapacity));
-        this.elementData = new T[initialCapacity];
-        this.elementCount = 0;
+        elementData = new T[initialCapacity];
+        elementCount = 0;
         this.capacityIncrement = capacityIncrement;
     }
-    // 2) Конструктор с capacity
+
     public MyVector(int initialCapacity) : this(initialCapacity, 0) { }
-    // 3) Конструктор без параметров
     public MyVector() : this(10, 0) { }
-    // 4) Конструктор из массива
+
     public MyVector(T[] a)
     {
         if (a == null) throw new ArgumentNullException(nameof(a));
@@ -26,12 +26,17 @@ public class MyVector<T>
         elementCount = a.Length;
         capacityIncrement = 0;
     }
-    // Увеличение ёмкости
+
+    public MyVector(MyCollection<T> c) : this()
+    {
+        addAll(c);
+    }
+
     private void EnsureCapacity()
     {
         if (elementCount >= elementData.Length)
         {
-            int newCapacity = (capacityIncrement > 0)
+            int newCapacity = capacityIncrement > 0
                 ? elementData.Length + capacityIncrement
                 : elementData.Length * 2;
             if (newCapacity == 0) newCapacity = 1;
@@ -40,44 +45,44 @@ public class MyVector<T>
             elementData = newArray;
         }
     }
-    // 5) Добавление элемента
+
     public void Add(T e)
     {
         EnsureCapacity();
         elementData[elementCount++] = e;
     }
-    // 6) Добавить массив
+
     public void AddAll(T[] a)
     {
         if (a == null) throw new ArgumentNullException(nameof(a));
-        foreach (T item in a)
-            Add(item);
+        for (int i = 0; i < a.Length; i++)
+            Add(a[i]);
     }
-    // 7) Очистка
+
     public void Clear()
     {
         elementCount = 0;
         elementData = new T[10];
     }
-    // 8) Содержит ли объект
+
     public bool Contains(object o)
     {
         return IndexOf(o) != -1;
     }
-    // 9) Содержит ли все
+
     public bool ContainsAll(T[] a)
     {
         if (a == null) throw new ArgumentNullException(nameof(a));
-        foreach (T item in a)
-            if (!Contains(item)) return false;
+        for (int i = 0; i < a.Length; i++)
+            if (!Contains(a[i])) return false;
         return true;
     }
-    // 10) Пустой ли
+
     public bool IsEmpty()
     {
         return elementCount == 0;
     }
-    // 11) Удалить объект
+
     public bool Remove(object o)
     {
         int index = IndexOf(o);
@@ -85,14 +90,14 @@ public class MyVector<T>
         Remove(index);
         return true;
     }
-    // 12) Удалить все из массива
+
     public void RemoveAll(T[] a)
     {
         if (a == null) throw new ArgumentNullException(nameof(a));
-        foreach (T item in a)
-            Remove(item);
+        for (int i = 0; i < a.Length; i++)
+            Remove(a[i]);
     }
-    // 13) Оставить только указанные
+
     public void RetainAll(T[] a)
     {
         if (a == null) throw new ArgumentNullException(nameof(a));
@@ -105,19 +110,19 @@ public class MyVector<T>
         }
         elementCount = newSize;
     }
-    // 14) Размер
+
     public int Size()
     {
         return elementCount;
     }
-    // 15) ToArray()
+
     public object[] ToArray()
     {
         object[] result = new object[elementCount];
         Array.Copy(elementData, result, elementCount);
         return result;
     }
-    // 16) ToArray(T[])
+
     public T[] ToArray(T[] a)
     {
         if (a == null || a.Length < elementCount)
@@ -126,15 +131,13 @@ public class MyVector<T>
             Array.Copy(elementData, result, elementCount);
             return result;
         }
-        else
-        {
-            Array.Copy(elementData, a, elementCount);
-            if (a.Length > elementCount)
-                a[elementCount] = default;
-            return a;
-        }
+
+        Array.Copy(elementData, a, elementCount);
+        if (a.Length > elementCount)
+            a[elementCount] = default(T);
+        return a;
     }
-    // 17) Добавить по индексу
+
     public void Add(int index, T e)
     {
         if (index < 0 || index > elementCount) throw new ArgumentOutOfRangeException(nameof(index));
@@ -143,23 +146,21 @@ public class MyVector<T>
         elementData[index] = e;
         elementCount++;
     }
-    // 18) Добавить массив в позицию
+
     public void AddAll(int index, T[] a)
     {
         if (a == null) throw new ArgumentNullException(nameof(a));
         if (index < 0 || index > elementCount) throw new ArgumentOutOfRangeException(nameof(index));
-        foreach (T item in a)
-        {
-            Add(index++, item);
-        }
+        for (int i = 0; i < a.Length; i++)
+            Add(index + i, a[i]);
     }
-    // 19) Получить элемент
+
     public T Get(int index)
     {
         if (index < 0 || index >= elementCount) throw new ArgumentOutOfRangeException(nameof(index));
         return elementData[index];
     }
-    // 20) IndexOf
+
     public int IndexOf(object o)
     {
         if (o == null)
@@ -174,7 +175,7 @@ public class MyVector<T>
         }
         return -1;
     }
-    // 21) LastIndexOf
+
     public int LastIndexOf(object o)
     {
         if (o == null)
@@ -189,7 +190,7 @@ public class MyVector<T>
         }
         return -1;
     }
-    // 22) Remove по индексу
+
     public T Remove(int index)
     {
         if (index < 0 || index >= elementCount) throw new ArgumentOutOfRangeException(nameof(index));
@@ -198,7 +199,7 @@ public class MyVector<T>
         elementCount--;
         return oldValue;
     }
-    // 23) Set
+
     public T Set(int index, T e)
     {
         if (index < 0 || index >= elementCount) throw new ArgumentOutOfRangeException(nameof(index));
@@ -206,7 +207,7 @@ public class MyVector<T>
         elementData[index] = e;
         return oldValue;
     }
-    // 24) SubList
+
     public MyVector<T> SubList(int fromIndex, int toIndex)
     {
         if (fromIndex < 0 || toIndex > elementCount || fromIndex > toIndex)
@@ -216,24 +217,24 @@ public class MyVector<T>
         Array.Copy(elementData, fromIndex, subArray, 0, length);
         return new MyVector<T>(subArray);
     }
-    // 25) Первый элемент
+
     public T FirstElement()
     {
         if (IsEmpty()) throw new InvalidOperationException("Вектор пуст");
         return elementData[0];
     }
-    // 26) Последний элемент
+
     public T LastElement()
     {
         if (IsEmpty()) throw new InvalidOperationException("Вектор пуст");
         return elementData[elementCount - 1];
     }
-    // 27) RemoveElementAt
+
     public void RemoveElementAt(int pos)
     {
         Remove(pos);
     }
-    // 28) RemoveRange
+
     public void RemoveRange(int begin, int end)
     {
         if (begin < 0 || end > elementCount || begin > end)
@@ -242,6 +243,7 @@ public class MyVector<T>
         Array.Copy(elementData, end, elementData, begin, elementCount - end);
         elementCount -= length;
     }
+
     public MyListIterator<T> listIterator()
     {
         return new MyItr(this, 0);
@@ -256,75 +258,51 @@ public class MyVector<T>
 
     private class MyItr : MyListIterator<T>
     {
-        private MyVector<T> list;
+        private readonly MyVector<T> list;
         private int cursor;
         private int lastRet;
 
         public MyItr(MyVector<T> list, int index)
         {
             this.list = list;
-            this.cursor = index;
-            this.lastRet = -1;
+            cursor = index;
+            lastRet = -1;
         }
 
-        public bool hasNext()
-        {
-            return cursor < list.elementCount;
-        }
+        public bool hasNext() { return cursor < list.elementCount; }
 
         public T next()
         {
-            if (!hasNext())
-                throw new NoSuchElementException();
-
+            if (!hasNext()) throw new NoSuchElementException();
             lastRet = cursor;
             cursor++;
             return list.elementData[lastRet];
         }
 
-        public bool hasPrevious()
-        {
-            return cursor > 0;
-        }
+        public bool hasPrevious() { return cursor > 0; }
 
         public T previous()
         {
-            if (!hasPrevious())
-                throw new NoSuchElementException();
-
+            if (!hasPrevious()) throw new NoSuchElementException();
             cursor--;
             lastRet = cursor;
             return list.elementData[lastRet];
         }
 
-        public int nextIndex()
-        {
-            return cursor;
-        }
-
-        public int previousIndex()
-        {
-            return cursor - 1;
-        }
+        public int nextIndex() { return cursor; }
+        public int previousIndex() { return cursor - 1; }
 
         public void remove()
         {
-            if (lastRet < 0)
-                throw new IllegalStateException();
-
+            if (lastRet < 0) throw new IllegalStateException();
             list.Remove(lastRet);
-
-            if (lastRet < cursor)
-                cursor--;
-
+            if (lastRet < cursor) cursor--;
             lastRet = -1;
         }
 
         public void set(T element)
         {
-            if (lastRet < 0)
-                throw new IllegalStateException();
-
+            if (lastRet < 0) throw new IllegalStateException();
             list.Set(lastRet, element);
         }
 
@@ -335,6 +313,77 @@ public class MyVector<T>
             lastRet = -1;
         }
     }
+
+    public bool add(T e) { Add(e); return true; }
+
+    public bool addAll(MyCollection<T> c)
+    {
+        if (c == null) throw new ArgumentNullException(nameof(c));
+        object[] arr = c.toArray();
+        for (int i = 0; i < arr.Length; i++) Add((T)arr[i]);
+        return arr.Length > 0;
+    }
+
+    public void clear() { Clear(); }
+    public bool contains(object o) { return Contains(o); }
+
+    public bool containsAll(MyCollection<T> c)
+    {
+        if (c == null) throw new ArgumentNullException(nameof(c));
+        object[] arr = c.toArray();
+        for (int i = 0; i < arr.Length; i++)
+            if (!Contains(arr[i])) return false;
+        return true;
+    }
+
+    public bool isEmpty() { return IsEmpty(); }
+    public bool remove(object o) { return Remove(o); }
+
+    public bool removeAll(MyCollection<T> c)
+    {
+        if (c == null) throw new ArgumentNullException(nameof(c));
+        bool changed = false;
+        object[] arr = c.toArray();
+        for (int i = 0; i < arr.Length; i++)
+            if (Remove(arr[i])) changed = true;
+        return changed;
+    }
+
+    public bool retainAll(MyCollection<T> c)
+    {
+        if (c == null) throw new ArgumentNullException(nameof(c));
+        HashSet<T> set = new HashSet<T>();
+        object[] arr = c.toArray();
+        for (int i = 0; i < arr.Length; i++) set.Add((T)arr[i]);
+
+        int oldSize = elementCount;
+        int newSize = 0;
+        for (int i = 0; i < elementCount; i++)
+        {
+            if (set.Contains(elementData[i]))
+                elementData[newSize++] = elementData[i];
+        }
+        elementCount = newSize;
+        return oldSize != elementCount;
+    }
+
+    public int size() { return Size(); }
+    public object[] toArray() { return ToArray(); }
+    public T[] toArray(T[] a) { return ToArray(a); }
+    public void add(int index, T e) { Add(index, e); }
+
+    public bool addAll(int index, MyCollection<T> c)
+    {
+        if (c == null) throw new ArgumentNullException(nameof(c));
+        object[] arr = c.toArray();
+        for (int i = 0; i < arr.Length; i++) Add(index + i, (T)arr[i]);
+        return arr.Length > 0;
+    }
+
+    public T get(int index) { return Get(index); }
+    public int indexOf(object o) { return IndexOf(o); }
+    public int lastIndexOf(object o) { return LastIndexOf(o); }
+    public T remove(int index) { return Remove(index); }
+    public T set(int index, T e) { return Set(index, e); }
+    public MyList<T> subList(int fromIndex, int toIndex) { return SubList(fromIndex, toIndex); }
 }
-
-

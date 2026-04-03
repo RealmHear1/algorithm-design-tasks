@@ -45,25 +45,31 @@
   <ItemGroup>
     <Compile Include="MyArrayDeque.cs" />
     <Compile Include="MyArrayList.cs" />
+    <Compile Include="MyCollection.cs" />
+    <Compile Include="MyDeque.cs" />
     <Compile Include="MyHashSet.cs" />
+    <Compile Include="MyHashMap.cs" />
     <Compile Include="MyIterator.cs" />
     <Compile Include="MyIteratorExceptions.cs" />
     <Compile Include="MyLinkedList.cs" />
+    <Compile Include="MyList.cs" />
     <Compile Include="MyListIterator.cs" />
+    <Compile Include="MyMap.cs" />
+    <Compile Include="MyNavigableMap.cs" />
+    <Compile Include="MyNavigableSet.cs" />
     <Compile Include="MyPriopityQueue.cs" />
+    <Compile Include="MyQueue.cs" />
+    <Compile Include="MySet.cs" />
+    <Compile Include="MySortedMap.cs" />
+    <Compile Include="MySortedSet.cs" />
     <Compile Include="MyTreeSet.cs" />
+    <Compile Include="MyTreeMap.cs" />
     <Compile Include="MyVector.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Task21\Task21\Task21.csproj">
-      <Project>{fcf7b850-265d-47c9-8784-d738521f195b}</Project>
-      <Name>Task21</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

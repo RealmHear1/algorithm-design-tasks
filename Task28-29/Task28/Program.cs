@@ -150,7 +150,7 @@ namespace Task28
             }
 
             Console.WriteLine("После удаления:");
-            int[] arr = queue.ToArray();
+            int[] arr = queue.ToArray(new int[queue.Size()]);
             PrintIntArray(arr);
         }
 

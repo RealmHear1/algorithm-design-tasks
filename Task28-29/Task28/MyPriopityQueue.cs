@@ -1,50 +1,55 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Task6
 {
-    public class MyPriorityQueue<T>
+    public class MyPriorityQueue<T> : MyQueue<T>
     {
         private T[] queue;
-        private int size;
+        private int sizeValue;
         private IComparer<T> comparator;
         private const int DEFAULT_CAPACITY = 11;
-        // Конструкторы
+
         public MyPriorityQueue()
             : this(DEFAULT_CAPACITY, Comparer<T>.Default) { }
+
         public MyPriorityQueue(int initialCapacity)
             : this(initialCapacity, Comparer<T>.Default) { }
+
         public MyPriorityQueue(int initialCapacity, IComparer<T> comp)
         {
             if (initialCapacity <= 0) throw new ArgumentException("Вместимость должна быть > 0");
             queue = new T[initialCapacity];
-            if (comp != null)
-                comparator = comp;
-            else
-                comparator = Comparer<T>.Default;
-            size = 0;
+            comparator = comp ?? Comparer<T>.Default;
+            sizeValue = 0;
         }
+
         public MyPriorityQueue(T[] a)
             : this(Math.Max(DEFAULT_CAPACITY, a.Length), Comparer<T>.Default)
         {
             AddAll(a);
         }
-        public MyPriorityQueue(MyPriorityQueue<T> other)
-            : this(other.size, other.comparator)
+
+        public MyPriorityQueue(MyCollection<T> c)
+            : this()
         {
-            AddAll(other.ToArray());
+            addAll(c);
         }
-        // Методы
+
+        public MyPriorityQueue(MyPriorityQueue<T> other)
+            : this(other.sizeValue, other.comparator)
+        {
+            AddAll(other.ToArrayRaw());
+        }
+
         public void Add(T e)
         {
-            EnsureCapacity(size + 1);
-            queue[size] = e;
-            SiftUp(size);
-            size++;
+            EnsureCapacity(sizeValue + 1);
+            queue[sizeValue] = e;
+            SiftUp(sizeValue);
+            sizeValue++;
         }
+
         public bool Offer(T e)
         {
             try
@@ -57,33 +62,41 @@ namespace Task6
                 return false;
             }
         }
+
         public void AddAll(T[] a)
         {
-            foreach (var e in a)
-                Add(e);
+            if (a == null) throw new ArgumentNullException(nameof(a));
+            for (int i = 0; i < a.Length; i++)
+                Add(a[i]);
         }
+
         public void Clear()
         {
             queue = new T[DEFAULT_CAPACITY];
-            size = 0;
+            sizeValue = 0;
         }
+
         public bool Contains(T o)
         {
-            for (int i = 0; i < size; i++)
+            for (int i = 0; i < sizeValue; i++)
                 if (EqualityComparer<T>.Default.Equals(queue[i], o))
                     return true;
             return false;
         }
+
         public bool ContainsAll(T[] a)
         {
-            foreach (var e in a)
-                if (!Contains(e)) return false;
+            if (a == null) throw new ArgumentNullException(nameof(a));
+            for (int i = 0; i < a.Length; i++)
+                if (!Contains(a[i])) return false;
             return true;
         }
-        public bool IsEmpty() => size == 0;
+
+        public bool IsEmpty() { return sizeValue == 0; }
+
         public bool Remove(T o)
         {
-            for (int i = 0; i < size; i++)
+            for (int i = 0; i < sizeValue; i++)
             {
                 if (EqualityComparer<T>.Default.Equals(queue[i], o))
                 {
@@ -93,15 +106,19 @@ namespace Task6
             }
             return false;
         }
+
         public void RemoveAll(T[] a)
         {
-            foreach (var e in a)
-                Remove(e);
+            if (a == null) throw new ArgumentNullException(nameof(a));
+            for (int i = 0; i < a.Length; i++)
+                Remove(a[i]);
         }
+
         public void RetainAll(T[] a)
         {
+            if (a == null) throw new ArgumentNullException(nameof(a));
             HashSet<T> keep = new HashSet<T>(a);
-            for (int i = 0; i < size;)
+            for (int i = 0; i < sizeValue;)
             {
                 if (!keep.Contains(queue[i]))
                     RemoveAt(i);
@@ -109,48 +126,64 @@ namespace Task6
                     i++;
             }
         }
-        public int Size() => size;
-        public T[] ToArray()
+
+        public int Size() { return sizeValue; }
+
+        public T[] ToArrayRaw()
         {
-            T[] result = new T[size];
-            Array.Copy(queue, result, size);
+            T[] result = new T[sizeValue];
+            Array.Copy(queue, result, sizeValue);
             return result;
         }
+
+        public object[] ToArray()
+        {
+            object[] result = new object[sizeValue];
+            Array.Copy(queue, result, sizeValue);
+            return result;
+        }
+
         public T[] ToArray(T[] a)
         {
-            if (a == null || a.Length < size)
-                return ToArray();
-            Array.Copy(queue, a, size);
+            if (a == null || a.Length < sizeValue)
+                return ToArrayRaw();
+            Array.Copy(queue, a, sizeValue);
+            if (a.Length > sizeValue)
+                a[sizeValue] = default(T);
             return a;
         }
+
         public T Element()
         {
             if (IsEmpty()) throw new InvalidOperationException("Queue is empty");
             return queue[0];
         }
+
         public T Peek()
         {
             return IsEmpty() ? default(T) : queue[0];
         }
+
         public T Poll()
         {
             if (IsEmpty()) return default(T);
             return RemoveAt(0);
         }
-        // Вспомогательные методы для кучи
+
         private T RemoveAt(int index)
         {
-            if (index < 0 || index >= size) throw new ArgumentOutOfRangeException();
+            if (index < 0 || index >= sizeValue) throw new ArgumentOutOfRangeException();
             T removed = queue[index];
-            size--;
-            if (index != size)
+            sizeValue--;
+            if (index != sizeValue)
             {
-                queue[index] = queue[size];
-                queue[size] = default(T);
+                queue[index] = queue[sizeValue];
+                queue[sizeValue] = default(T);
                 SiftDown(index);
             }
             return removed;
         }
+
         private void EnsureCapacity(int minCapacity)
         {
             if (minCapacity > queue.Length)
@@ -161,6 +194,7 @@ namespace Task6
                 Array.Resize(ref queue, newCap);
             }
         }
+
         private void SiftUp(int i)
         {
             T e = queue[i];
@@ -173,15 +207,16 @@ namespace Task6
             }
             queue[i] = e;
         }
+
         private void SiftDown(int i)
         {
             T e = queue[i];
-            int half = size / 2;
+            int half = sizeValue / 2;
             while (i < half)
             {
                 int child = i * 2 + 1;
                 int right = child + 1;
-                if (right < size && comparator.Compare(queue[right], queue[child]) < 0)
+                if (right < sizeValue && comparator.Compare(queue[right], queue[child]) < 0)
                     child = right;
                 if (comparator.Compare(queue[child], e) >= 0)
                     break;
@@ -190,6 +225,7 @@ namespace Task6
             }
             queue[i] = e;
         }
+
         public MyIterator<T> iterator()
         {
             return new MyItr(this);
@@ -197,18 +233,18 @@ namespace Task6
 
         private class MyItr : MyIterator<T>
         {
-            private MyPriorityQueue<T> queue;
-            private int cursor = 0;
+            private readonly MyPriorityQueue<T> queueRef;
+            private int cursor;
             private int lastRet = -1;
 
             public MyItr(MyPriorityQueue<T> q)
             {
-                queue = q;
+                queueRef = q;
             }
 
             public bool hasNext()
             {
-                return cursor < queue.size;
+                return cursor < queueRef.sizeValue;
             }
 
             public T next()
@@ -217,7 +253,7 @@ namespace Task6
                     throw new NoSuchElementException();
 
                 lastRet = cursor;
-                return queue.queue[cursor++];
+                return queueRef.queue[cursor++];
             }
 
             public void remove()
@@ -225,10 +261,71 @@ namespace Task6
                 if (lastRet < 0)
                     throw new IllegalStateException();
 
-                queue.RemoveAt(lastRet);
+                queueRef.RemoveAt(lastRet);
                 cursor = lastRet;
                 lastRet = -1;
             }
         }
+
+        public bool add(T e) { Add(e); return true; }
+
+        public bool addAll(MyCollection<T> c)
+        {
+            if (c == null) throw new ArgumentNullException(nameof(c));
+            object[] arr = c.toArray();
+            for (int i = 0; i < arr.Length; i++) Add((T)arr[i]);
+            return arr.Length > 0;
+        }
+
+        public void clear() { Clear(); }
+        public bool contains(object o) { return o is T && Contains((T)o); }
+
+        public bool containsAll(MyCollection<T> c)
+        {
+            if (c == null) throw new ArgumentNullException(nameof(c));
+            object[] arr = c.toArray();
+            for (int i = 0; i < arr.Length; i++)
+                if (!contains(arr[i])) return false;
+            return true;
+        }
+
+        public bool isEmpty() { return IsEmpty(); }
+        public bool remove(object o) { return o is T && Remove((T)o); }
+
+        public bool removeAll(MyCollection<T> c)
+        {
+            if (c == null) throw new ArgumentNullException(nameof(c));
+            bool changed = false;
+            object[] arr = c.toArray();
+            for (int i = 0; i < arr.Length; i++)
+                if (remove(arr[i])) changed = true;
+            return changed;
+        }
+
+        public bool retainAll(MyCollection<T> c)
+        {
+            if (c == null) throw new ArgumentNullException(nameof(c));
+            HashSet<T> keep = new HashSet<T>();
+            object[] arr = c.toArray();
+            for (int i = 0; i < arr.Length; i++) keep.Add((T)arr[i]);
+
+            int oldSize = sizeValue;
+            for (int i = 0; i < sizeValue;)
+            {
+                if (!keep.Contains(queue[i]))
+                    RemoveAt(i);
+                else
+                    i++;
+            }
+            return oldSize != sizeValue;
+        }
+
+        public int size() { return Size(); }
+        public object[] toArray() { return ToArray(); }
+        public T[] toArray(T[] a) { return ToArray(a); }
+        public T element() { return Element(); }
+        public bool offer(T obj) { return Offer(obj); }
+        public T peek() { return Peek(); }
+        public T poll() { return Poll(); }
     }
 }
